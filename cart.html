@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>购物车</title>
+    <style type="text/css">
+        .container {
+            margin: auto;
+            width: 1200px;
+        }
+
+        .container .cart {
+            width: 1200px;
+        }
+
+        .container .title {
+            background-color: lightblue;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            /*color: #fff;*/
+        }
+
+        .container .total {
+            background-color: #ccc;
+            height: 50px;
+            line-height: 50px;
+            text-align: right;
+        }
+
+        .container .total button {
+            margin: 0 10px;
+            background-color: seagreen;
+            height: 35px;
+            width: 80px;
+            border: 0;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .container .total span {
+            color: red;
+            font-weight: bold;
+        }
+
+        .container .item {
+            height: 55px;
+            line-height: 55px;
+            position: relative;
+            border-top: 1px solid #ADD8E6;
+        }
+
+        .container .item img {
+            width: 45px;
+            height: 45px;
+            margin: 5px;
+        }
+
+        .container .item .name {
+            position: absolute;
+            width: 90px;
+            top: 0;
+            left: 55px;
+            font-size: 16px;
+        }
+
+        .container .item .change {
+            width: 100px;
+            position: absolute;
+            top: 0;
+            right: 50px;
+        }
+
+        .container .item .change a {
+            font-size: 20px;
+            width: 30px;
+            text-decoration: none;
+            background-color: lightgray;
+            vertical-align: middle;
+        }
+
+        .container .item .change .num {
+            width: 40px;
+            height: 25px;
+        }
+
+        .container .item .del {
+            position: absolute;
+            top: 0;
+            right: 0px;
+            width: 40px;
+            text-align: center;
+            font-size: 40px;
+            cursor: pointer;
+            color: red;
+        }
+
+        .container .item .del:hover {
+            background-color: #ccc;
+        }
+        .item div:nth-child(2){
+            color: red;
+            margin-left: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <car-big></car-big>
+        </div>
+    </div>
+<script src="./vue.js"></script>
+<script>
+    var carOne={
+        template:`<div class="title">我的商品</div>`
+    }
+    var carTwo={
+        props:["list"],
+        template:`
+        <div>
+            <div class="item" :key="v.id" v-for="v in list">
+                <div class="name">{{v.name}}</div>
+                <div><span>单价：￥{{v.price}}</span></div>
+                <div class="change">
+                    <a href="" @click.prevent="sub(v.id)">－</a>
+                    <input type="text" class="num" :value="v.num" @blur="handle(v.id,$event)"/>
+                    <a href="" @click.prevent="add(v.id)">＋</a>
+                </div>
+                <div class="del" @click="del(v.id)">×</div>
+            </div>
+        </div>
+        `,
+        methods:{
+            del(id){
+                var index=this.list.find(item=>{
+                    if(item.id===id){
+                        return true
+                    }
+                })
+                this.list.splice(index,1)
+            },
+            handle(id,e){
+                this.$emit("han",{
+                   id:id,
+                   num:e.target.value,
+                   type:"blur"
+                })
+            },
+            sub(id){
+                this.$emit("han",{
+                   id:id,
+                   type:"sub"
+                })
+            },
+            add(id){
+                this.$emit("han",{
+                   id:id,
+                   type:"add"
+                })
+            }
+        }
+    }
+    var carThree={
+        props:["list"],
+        template:` <div class="total">
+                    <span>总价:{{showlist}}</span>
+                    <button>结算</button>
+                </div>
+            `,
+            computed:{
+                showlist(){
+                    // let sum=""
+                    // this.list.price.forEach(v => {
+                    //     sum+=this.list.price
+                    // });
+                    let sum=0;
+
+                    this.list.forEach(v => {
+                        sum+=v.price*v.num
+                    });
+                    return sum
+                }
+            }
+    }
+    var carBig={
+        data(){
+            return{
+                list: [{
+                    id: 1,
+                    name: '火车',
+                    price: 699,
+                    num: 1,
+                }, {
+                    id: 2,
+                    name: '小车',
+                    price: 1999,
+                    num: 1,
+                }, {
+                    id: 3,
+                    name: '动车',
+                    price: 2999,
+                    num: 1,
+                }, {
+                    id: 4,
+                    name: '飞机',
+                    price: 3999,
+                    num: 1,
+                }, {
+                    id: 5,
+                    name: '自行车',
+                    price: 199,
+                    num: 2,
+                }],
+            }
+        },
+        methods:{
+            gan(val){
+                if(val.type==="add"){
+                    this.list.some(item=>{
+                   if(item.id==val.id){
+                       item.num+=1;
+                       return true;
+                   }
+                }) 
+                }else if(val.type==="sub"){
+                    this.list.some(item=>{
+                   if(item.id==val.id){
+                       if(item.num<=0){
+                           item.num=1
+                       }else{
+                            item.num-=1;
+                       return true;
+                       }
+                   }
+                }) 
+                }else if(val.type==="blur"){
+                    this.list.some(item=>{
+                   if(item.id==val.id){
+                       item.num=val.num;
+                       return true;
+                   }
+                }) 
+
+                }
+            }
+        },
+        template:`<div class="cart">
+            <carOne></carOne>
+            <carTwo :list="list" @han="gan($event)"></carTwo>
+            <carThree :list="list"></carThree>
+            </div>`,
+        components:{
+            carOne,
+            carTwo,
+            carThree
+        }
+    }
+    var vm=new Vue({
+        el:'#app',
+        components:{
+            carBig
+        }
+
+    })
+</script>
+</body>
+
+</html>
